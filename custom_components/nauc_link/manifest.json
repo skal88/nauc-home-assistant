@@ -4,10 +4,10 @@
   "codeowners": ["@skal88"],
   "config_flow": true,
   "dependencies": ["auth"],
-  "documentation": "https://github.com/Nau-Creations/nauc-home-assistant",
+  "documentation": "https://github.com/skal88/nauc-home-assistant",
   "integration_type": "service",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/Nau-Creations/nauc-home-assistant/issues",
+  "issue_tracker": "https://github.com/skal88/nauc-home-assistant/issues",
   "requirements": [],
   "version": "0.1.0"
 }

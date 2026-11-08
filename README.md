@@ -13,7 +13,7 @@ integration cannot create, change or delete your links.
 ### HACS (recommended)
 
 1. In HACS, open the menu → **Custom repositories**, add
-   `https://github.com/Nau-Creations/nauc-home-assistant` with category
+   `https://github.com/skal88/nauc-home-assistant` with category
    **Integration**.
 2. Search for **NAUC.link**, download it and restart Home Assistant.
 
