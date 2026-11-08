@@ -1,0 +1,9 @@
+{
+  "total": 2,
+  "page": 0,
+  "limit": 100,
+  "shorts": [
+    { "id": "11111111-1111-4111-8111-111111111111", "enabled": true, "short": "menu", "type": "Url", "name": "Carta del bar" },
+    { "id": "22222222-2222-4222-8222-222222222222", "enabled": true, "short": "wifi", "type": "Url", "name": "WiFi" }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "config": {
+    "step": {
+      "pick_implementation": {
+        "title": "Elige el método de autenticación"
+      },
+      "reauth_confirm": {
+        "title": "Vuelve a iniciar sesión en NAUC.link",
+        "description": "La sesión de NAUC.link guardada en Home Assistant ya no es válida. Vuelve a iniciar sesión para que los sensores sigan actualizándose."
+      }
+    },
+    "abort": {
+      "already_configured": "Esta cuenta de NAUC.link ya está configurada.",
+      "already_in_progress": "Ya hay un inicio de sesión de NAUC.link en curso.",
+      "authorize_url_timeout": "Se agotó el tiempo al generar la URL de inicio de sesión de NAUC.link.",
+      "missing_configuration": "La integración no está configurada. Sigue la documentación.",
+      "missing_credentials": "La integración necesita credenciales de aplicación.",
+      "no_url_available": "No hay ninguna URL disponible. Comprueba que la integración `my` está activada.",
+      "oauth_error": "NAUC.link ha devuelto un token no válido.",
+      "oauth_failed": "Error al obtener el token de acceso de NAUC.link.",
+      "oauth_implementation_unavailable": "El inicio de sesión de NAUC.link no está disponible ahora mismo.",
+      "oauth_timeout": "Se agotó el tiempo al obtener el token de NAUC.link.",
+      "oauth_unauthorized": "NAUC.link ha rechazado la autorización.",
+      "user_rejected_authorize": "No se ha concedido el acceso: {error}",
+      "reauth_successful": "Has vuelto a iniciar sesión correctamente.",
+      "wrong_account": "Has iniciado sesión con otra cuenta de NAUC.link. Usa la cuenta a la que pertenece esta integración."
+    },
+    "create_entry": {
+      "default": "Conectado a NAUC.link."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "plan": {
+        "name": "Plan",
+        "state": {
+          "free": "Gratis",
+          "ong": "ONG",
+          "pro": "Pro",
+          "business": "Business"
+        },
+        "state_attributes": {
+          "status": {
+            "name": "Estado de la suscripción"
+          }
+        }
+      },
+      "plan_period_end": {
+        "name": "Renovación del plan"
+      },
+      "links_total": {
+        "name": "Enlaces",
+        "unit_of_measurement": "enlaces",
+        "state_attributes": {
+          "limit": {
+            "name": "Límite del plan"
+          }
+        }
+      },
+      "links_active": {
+        "name": "Enlaces activos",
+        "unit_of_measurement": "enlaces",
+        "state_attributes": {
+          "limit": {
+            "name": "Límite del plan"
+          }
+        }
+      },
+      "pages": {
+        "name": "Páginas",
+        "unit_of_measurement": "páginas",
+        "state_attributes": {
+          "limit": {
+            "name": "Límite del plan"
+          }
+        }
+      },
+      "cartas": {
+        "name": "Cartas",
+        "unit_of_measurement": "cartas",
+        "state_attributes": {
+          "limit": {
+            "name": "Límite del plan"
+          }
+        }
+      },
+      "visits_30d": {
+        "name": "Visitas (30 días)",
+        "unit_of_measurement": "visitas"
+      },
+      "visits_today": {
+        "name": "Visitas hoy",
+        "unit_of_measurement": "visitas"
+      },
+      "daily_unique_visitors": {
+        "name": "Visitantes únicos diarios",
+        "unit_of_measurement": "visitantes"
+      },
+      "qr_share": {
+        "name": "Visitas desde QR"
+      },
+      "unread_notifications": {
+        "name": "Notificaciones sin leer",
+        "unit_of_measurement": "notificaciones"
+      },
+      "broken_links": {
+        "name": "Enlaces rotos",
+        "unit_of_measurement": "enlaces",
+        "state_attributes": {
+          "links": {
+            "name": "Enlaces"
+          }
+        }
+      }
+    }
+  }
+}

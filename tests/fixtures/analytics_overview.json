@@ -1,0 +1,11 @@
+{
+  "range": { "from": "2026-10-10T12:00:00.000Z", "to": "2026-11-09T12:00:00.000Z" },
+  "totals": { "visits": 1234, "dailyUniquesAvg": 31, "qrPct": 64 },
+  "series": [
+    { "day": "2026-11-08", "visits": 50, "uniques": 30 },
+    { "day": "2026-11-09", "visits": 17, "uniques": 11 }
+  ],
+  "bySource": [{ "source": "qr", "visits": 790 }, { "source": "direct", "visits": 444 }],
+  "byCountry": [{ "country": "ES", "visits": 1200 }],
+  "byDevice": [{ "device": "mobile", "visits": 1000 }]
+}

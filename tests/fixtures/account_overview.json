@@ -1,0 +1,19 @@
+{
+  "plan": {
+    "id": "pro",
+    "status": "active",
+    "currentPeriodEnd": "2026-12-01T10:00:00.000Z",
+    "lockedShortTypes": [],
+    "analyticsRetentionDays": 365
+  },
+  "usage": {
+    "total": { "used": 42, "limit": 200 },
+    "active": { "used": 12, "limit": 25 },
+    "customCodes": { "used": 0, "limit": 1 },
+    "cartas": { "used": 1, "limit": 2 },
+    "dailyMenus": { "used": 0, "limit": 60 },
+    "pages": { "used": 3, "limit": 50 },
+    "files": { "used": 4, "limit": 50 },
+    "aiImports": { "used": 0, "limit": 20 }
+  }
+}
