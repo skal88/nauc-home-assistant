@@ -64,9 +64,14 @@ def _mock_token(aioclient_mock: AiohttpClientMocker, access_token: str) -> None:
 
 @pytest.fixture(autouse=True)
 async def setup_auth(hass: HomeAssistant) -> None:
-    """Set up what the OAuth flow needs (the callback view lives in `auth`)."""
+    """Set up what a real instance already has: the OAuth callback view lives in `auth`.
+
+    The integration itself is deliberately not set up: Home Assistant does not
+    run `async_setup` before showing the config flow of an integration that
+    has no entries yet, so the flow must work without it.
+    """
     assert await async_setup_component(hass, "http", {})
-    assert await async_setup_component(hass, DOMAIN, {})
+    assert await async_setup_component(hass, "auth", {})
 
 
 @pytest.mark.usefixtures("current_request_with_host")
@@ -164,8 +169,13 @@ async def test_reauth_wrong_account(
     assert config_entry.data["token"]["access_token"] == ACCESS_TOKEN
 
 
-async def test_implementation_is_registered(hass: HomeAssistant) -> None:
-    """Users never need application credentials: the client ships built in."""
+async def test_implementation_is_registered_by_the_flow(hass: HomeAssistant) -> None:
+    """Users never need application credentials: the flow brings the client."""
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    assert result["type"] is not FlowResultType.ABORT, result.get("reason")
+
     implementations = await config_entry_oauth2_flow.async_get_implementations(
         hass, DOMAIN
     )

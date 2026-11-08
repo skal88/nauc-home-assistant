@@ -12,6 +12,7 @@ from homeassistant.config_entries import SOURCE_REAUTH, ConfigFlowResult
 from homeassistant.helpers import config_entry_oauth2_flow
 
 from .const import DOMAIN, SCOPES
+from .oauth import NaucOAuth2Implementation
 
 
 def _token_claims(access_token: str) -> dict[str, Any]:
@@ -42,6 +43,20 @@ class OAuth2FlowHandler(
     def extra_authorize_data(self) -> dict[str, Any]:
         """Ask for an offline token so the connection outlives the SSO session."""
         return {"scope": " ".join(SCOPES)}
+
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Register the built-in client before picking an implementation.
+
+        Home Assistant does not run the integration's `async_setup` before
+        showing the config flow of an integration with no entries, so the
+        registration there alone leaves the flow with nothing to pick.
+        """
+        config_entry_oauth2_flow.async_register_implementation(
+            self.hass, DOMAIN, NaucOAuth2Implementation(self.hass)
+        )
+        return await super().async_step_user(user_input)
 
     async def async_step_reauth(
         self, entry_data: Mapping[str, Any]
