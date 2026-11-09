@@ -113,5 +113,11 @@
         }
       }
     }
+  },
+  "issues": {
+    "broken_link": {
+      "title": "Enlace roto: {name}",
+      "description": "El enlace **{name}** ({short_url}) apunta a {destination}, que está fallando ({reason}). Quien escanee su QR o lo abra se encontrará un error.\n\nÁbrelo en NAUC.link para cambiar su destino. Este aviso desaparece solo cuando el destino vuelva a funcionar."
+    }
   }
 }

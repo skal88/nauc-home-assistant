@@ -98,3 +98,8 @@ class NaucApiClient:
             data = await self._get("/link-health/summary", {"shortIds": ",".join(ids)})
             summaries.extend(data.get("summaries", []))
         return summaries
+
+    async def link_health_detail(self, short_id: str) -> list[dict[str, Any]]:
+        """Per-destination health of one link (`url`, `status`, `statusCode`, `error`)."""
+        data = await self._get(f"/link-health/{short_id}")
+        return data.get("targets", [])

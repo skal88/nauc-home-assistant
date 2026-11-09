@@ -31,8 +31,9 @@ async def _setup(hass: HomeAssistant, entry: MockConfigEntry) -> None:
     await hass.async_block_till_done()
 
 
-@pytest.mark.usefixtures("mock_api")
-async def test_sensors(hass: HomeAssistant, config_entry: MockConfigEntry) -> None:
+async def test_sensors(
+    hass: HomeAssistant, config_entry: MockConfigEntry, mock_api: AsyncMock
+) -> None:
     """Every sensor reflects the API responses."""
     await _setup(hass, config_entry)
     assert config_entry.state is ConfigEntryState.LOADED
@@ -64,12 +65,20 @@ async def test_sensors(hass: HomeAssistant, config_entry: MockConfigEntry) -> No
     assert broken.state == "1"
     assert broken.attributes["links"] == [
         {
-            "short": "menu",
             "name": "Carta del bar",
+            "short": "menu",
             "url": "https://qr.nauc.link/menu",
+            "destination": "https://bar-ejemplo.es/carta.pdf",
+            "reason": "HTTP 404",
             "broken_since": "2026-11-07T08:00:00.000Z",
+            "last_checked": "2026-11-09T11:00:00.000Z",
+            "manage_url": "https://app.nauc.link/links/11111111-1111-4111-8111-111111111111",
         }
     ]
+    # Only the broken link's destinations are fetched.
+    mock_api.link_health_detail.assert_awaited_once_with(
+        "11111111-1111-4111-8111-111111111111"
+    )
 
     # Pages and cartas exist but start disabled.
     assert hass.states.get("sensor.ana_example_com_pages") is None

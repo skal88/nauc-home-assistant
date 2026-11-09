@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
@@ -20,7 +20,12 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import APP_URL, DOMAIN, PLANS
-from .coordinator import NaucConfigEntry, NaucData, NaucDataUpdateCoordinator
+from .coordinator import (
+    BrokenLink,
+    NaucConfigEntry,
+    NaucData,
+    NaucDataUpdateCoordinator,
+)
 
 # Coordinator-driven: no per-entity requests to throttle.
 PARALLEL_UPDATES = 0
@@ -49,6 +54,27 @@ def _limit(key: str) -> Callable[[NaucData], dict[str, Any]]:
         meter = data.usage.get(key)
         return {"limit": meter["limit"]} if meter else {}
 
+    return attributes
+
+
+def _broken_link_attributes(link: BrokenLink) -> dict[str, Any]:
+    """Flat enough to template with: the first failing destination up front."""
+    first = link.destinations[0] if link.destinations else None
+    attributes: dict[str, Any] = {
+        "name": link.label,
+        "short": link.short,
+        "url": link.url,
+        "destination": first.url if first else None,
+        "reason": first.reason if first else None,
+        "broken_since": link.broken_since,
+        "last_checked": first.last_checked if first else None,
+        "manage_url": link.manage_url,
+    }
+    if len(link.destinations) > 1:
+        attributes["destinations"] = [
+            {"url": d.url, "reason": d.reason, "last_checked": d.last_checked}
+            for d in link.destinations
+        ]
     return attributes
 
 
@@ -124,7 +150,7 @@ SENSORS: tuple[NaucSensorEntityDescription, ...] = (
             len(data.broken_links) if data.broken_links is not None else None
         ),
         attributes_fn=lambda data: {
-            "links": [asdict(link) for link in data.broken_links or []]
+            "links": [_broken_link_attributes(link) for link in data.broken_links or []]
         },
     ),
 )

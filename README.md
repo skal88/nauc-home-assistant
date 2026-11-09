@@ -51,11 +51,43 @@ Add the integration once per NAUC.link account.
 | Daily unique visitors | Average unique visitors per day (30 days) | |
 | Visits from QR | Share of visits that came from scanning a QR code (%) | |
 | Unread notifications | Unread notifications in NAUC.link | |
-| Broken links | Links whose destination is failing | `links`: `short`, `name`, `url`, `broken_since` |
+| Broken links | Links whose destination is failing | `links` (see below) |
 | Pages, Menus | Usage of those plan features (disabled by default) | `limit` |
 
 Data refreshes every 5 minutes; broken links every 30 minutes (NAUC.link
 checks destinations at most hourly).
+
+### Broken links
+
+Each entry of the `links` attribute of the **Broken links** sensor says which
+link fails and why:
+
+| Key | Example |
+|---|---|
+| `name` | `Carta del bar` (the short code if the link has no name) |
+| `short` / `url` | `menu` / `https://qr.nauc.link/menu` |
+| `destination` | `https://bar-ejemplo.es/carta.pdf`, where the link points |
+| `reason` | `HTTP 404`, or the network error (`ENOTFOUND`, a TLS error…) |
+| `broken_since` / `last_checked` | ISO timestamps |
+| `manage_url` | Page of the link in NAUC.link, to fix it |
+| `destinations` | Only when several destinations fail (programmable links, menus): `url`, `reason`, `last_checked` of each |
+
+Each broken link also shows up in **Settings → Repairs**, with the failing
+destination and a button to the link in NAUC.link. The notice disappears by
+itself once the destination works again.
+
+To list them on a dashboard, use a Markdown card:
+
+```yaml
+type: markdown
+title: Enlaces rotos
+content: >
+  {% for l in state_attr('sensor.your_account_broken_links', 'links') or [] %}
+  - **[{{ l.name }}]({{ l.manage_url }})** → {{ l.destination }} ({{ l.reason }})
+  {% else %}
+  Todo funciona.
+  {% endfor %}
+```
 
 ### Example: tell me when a link breaks
 
@@ -69,8 +101,9 @@ actions:
     data:
       title: "NAUC.link"
       message: >
-        {{ state_attr('sensor.your_account_broken_links', 'links')
-           | map(attribute='url') | join(', ') }} is broken.
+        {% for l in state_attr('sensor.your_account_broken_links', 'links') %}
+        {{ l.name }} → {{ l.destination }} ({{ l.reason }})
+        {% endfor %}
 ```
 
 ## Reauthentication

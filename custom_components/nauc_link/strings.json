@@ -113,5 +113,11 @@
         }
       }
     }
+  },
+  "issues": {
+    "broken_link": {
+      "title": "Broken link: {name}",
+      "description": "The link **{name}** ({short_url}) points to {destination}, which is failing ({reason}). Anyone scanning its QR code or opening it lands on an error.\n\nOpen it in NAUC.link to change its destination. This notice clears by itself once the destination works again."
+    }
   }
 }

@@ -72,4 +72,7 @@ def mock_api() -> Generator[AsyncMock]:
         client.unread_notifications.return_value = 3
         client.all_shorts.return_value = json_fixture("shorts.json")["shorts"]
         client.link_health.return_value = json_fixture("link_health.json")["summaries"]
+        client.link_health_detail.return_value = json_fixture(
+            "link_health_detail.json"
+        )["targets"]
         yield client

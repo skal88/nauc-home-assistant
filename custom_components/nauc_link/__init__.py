@@ -12,6 +12,7 @@ from .api import NaucApiClient
 from .const import API_URL, DOMAIN
 from .coordinator import NaucConfigEntry, NaucDataUpdateCoordinator
 from .oauth import NaucOAuth2Implementation
+from .repairs import async_delete_broken_link_issues
 
 PLATFORMS: list[Platform] = [Platform.SENSOR]
 
@@ -53,3 +54,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: NaucConfigEntry) -> bool
 async def async_unload_entry(hass: HomeAssistant, entry: NaucConfigEntry) -> bool:
     """Unload a config entry."""
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: NaucConfigEntry) -> None:
+    """Clear the broken-link issues of a removed account."""
+    async_delete_broken_link_issues(hass, entry)

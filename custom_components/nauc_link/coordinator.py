@@ -14,7 +14,14 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.util import dt as dt_util
 
 from .api import NaucApiClient, NaucApiError, NaucAuthError
-from .const import DOMAIN, LINK_HEALTH_INTERVAL, SHORT_BASE_URL, UPDATE_INTERVAL
+from .const import (
+    APP_URL,
+    DOMAIN,
+    LINK_HEALTH_INTERVAL,
+    SHORT_BASE_URL,
+    UPDATE_INTERVAL,
+)
+from .repairs import async_sync_broken_link_issues
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -22,13 +29,40 @@ type NaucConfigEntry = ConfigEntry[NaucDataUpdateCoordinator]
 
 
 @dataclass(frozen=True)
-class BrokenLink:
-    """A link whose destination the health checker found broken."""
+class BrokenDestination:
+    """One destination of a link that the health checker found failing."""
 
+    url: str
+    status_code: int | None
+    error: str | None
+    last_checked: str | None
+
+    @property
+    def reason(self) -> str | None:
+        """Why it fails, as short as possible: the HTTP status or the error."""
+        if self.status_code:
+            return f"HTTP {self.status_code}"
+        return self.error
+
+
+@dataclass(frozen=True)
+class BrokenLink:
+    """A link with at least one broken destination."""
+
+    id: str
     short: str
     name: str | None
     url: str
+    manage_url: str
     broken_since: str | None
+    # Most link types have one destination; programmable links and menus can
+    # have several, and only the failing ones are listed.
+    destinations: tuple[BrokenDestination, ...]
+
+    @property
+    def label(self) -> str:
+        """Owner-facing name, falling back to the short code."""
+        return self.name or self.short
 
 
 @dataclass
@@ -114,15 +148,37 @@ class NaucDataUpdateCoordinator(DataUpdateCoordinator[NaucData]):
         shorts = await self.client.all_shorts()
         by_id = {s["id"]: s for s in shorts if "id" in s}
         summaries = await self.client.link_health(list(by_id))
-        self._broken_links = [
-            BrokenLink(
-                short=by_id[s["shortId"]].get("short", ""),
-                name=by_id[s["shortId"]].get("name"),
-                url=f"{SHORT_BASE_URL}/{by_id[s['shortId']].get('short', '')}",
-                broken_since=s.get("brokenSince"),
+
+        broken: list[BrokenLink] = []
+        for summary in summaries:
+            short = by_id.get(summary.get("shortId", ""))
+            if not summary.get("broken") or short is None:
+                continue
+            # Only broken links get the per-destination detail.
+            targets = await self.client.link_health_detail(short["id"])
+            code = short.get("short", "")
+            broken.append(
+                BrokenLink(
+                    id=short["id"],
+                    short=code,
+                    name=short.get("name"),
+                    url=f"{SHORT_BASE_URL}/{code}",
+                    manage_url=f"{APP_URL}/links/{short['id']}",
+                    broken_since=summary.get("brokenSince"),
+                    destinations=tuple(
+                        BrokenDestination(
+                            url=t.get("url", ""),
+                            status_code=t.get("statusCode"),
+                            error=t.get("error"),
+                            last_checked=t.get("lastCheckedAt"),
+                        )
+                        for t in targets
+                        if t.get("status") == "broken"
+                    ),
+                )
             )
-            for s in summaries
-            if s.get("broken") and s.get("shortId") in by_id
-        ]
+
+        self._broken_links = broken
         self._health_fetched_at = now
+        async_sync_broken_link_issues(self.hass, self.config_entry, broken)
         return self._broken_links
