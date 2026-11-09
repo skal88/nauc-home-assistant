@@ -37,3 +37,9 @@ UPDATE_INTERVAL: Final = timedelta(minutes=5)
 LINK_HEALTH_INTERVAL: Final = timedelta(minutes=30)
 
 PLANS: Final = ["free", "ong", "pro", "business"]
+
+# Option: raise a repair issue per broken link. Off by default, since the
+# Broken links sensor already carries them and Repairs is meant for things
+# that need the Home Assistant owner's attention.
+CONF_BROKEN_LINK_REPAIRS: Final = "broken_link_repairs"
+DEFAULT_BROKEN_LINK_REPAIRS: Final = False

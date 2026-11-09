@@ -8,10 +8,22 @@ import json
 import logging
 from typing import Any
 
-from homeassistant.config_entries import SOURCE_REAUTH, ConfigFlowResult
+from homeassistant.config_entries import (
+    SOURCE_REAUTH,
+    ConfigEntry,
+    ConfigFlowResult,
+    OptionsFlow,
+)
+from homeassistant.core import callback
 from homeassistant.helpers import config_entry_oauth2_flow
+import voluptuous as vol
 
-from .const import DOMAIN, SCOPES
+from .const import (
+    CONF_BROKEN_LINK_REPAIRS,
+    DEFAULT_BROKEN_LINK_REPAIRS,
+    DOMAIN,
+    SCOPES,
+)
 from .oauth import NaucOAuth2Implementation
 
 
@@ -33,6 +45,12 @@ class OAuth2FlowHandler(
 
     DOMAIN = DOMAIN
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> NaucOptionsFlow:
+        """Return the options flow."""
+        return NaucOptionsFlow()
 
     @property
     def logger(self) -> logging.Logger:
@@ -86,3 +104,24 @@ class OAuth2FlowHandler(
         self._abort_if_unique_id_configured()
         title = claims.get("email") or claims.get("preferred_username") or "NAUC.link"
         return self.async_create_entry(title=title, data=data)
+
+
+class NaucOptionsFlow(OptionsFlow):
+    """Choose what the integration surfaces outside its sensors."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Show the options form."""
+        if user_input is not None:
+            return self.async_create_entry(data=user_input)
+
+        current = self.config_entry.options.get(
+            CONF_BROKEN_LINK_REPAIRS, DEFAULT_BROKEN_LINK_REPAIRS
+        )
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(
+                {vol.Required(CONF_BROKEN_LINK_REPAIRS, default=current): bool}
+            ),
+        )

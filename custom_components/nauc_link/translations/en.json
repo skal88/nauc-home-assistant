@@ -29,6 +29,19 @@
       "default": "Connected to NAUC.link."
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "NAUC.link options",
+        "data": {
+          "broken_link_repairs": "Show broken links in Repairs"
+        },
+        "data_description": {
+          "broken_link_repairs": "Raise a notice in Settings → Repairs for each broken link. The Broken links sensor lists them either way."
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "plan": {

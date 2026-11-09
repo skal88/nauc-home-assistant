@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock
 
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.core import HomeAssistant
+from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import issue_registry as ir
 import pytest
 from pytest_homeassistant_custom_component.common import (
@@ -13,7 +14,11 @@ from pytest_homeassistant_custom_component.common import (
     async_fire_time_changed,
 )
 
-from custom_components.nauc_link.const import DOMAIN, LINK_HEALTH_INTERVAL
+from custom_components.nauc_link.const import (
+    CONF_BROKEN_LINK_REPAIRS,
+    DOMAIN,
+    LINK_HEALTH_INTERVAL,
+)
 
 BROKEN_ID = "11111111-1111-4111-8111-111111111111"
 
@@ -22,6 +27,18 @@ BROKEN_ID = "11111111-1111-4111-8111-111111111111"
 def frozen_today(freezer: FrozenDateTimeFactory) -> None:
     """Keep time fixed so the link-health cache is predictable."""
     freezer.move_to("2026-11-09T12:00:00+00:00")
+
+
+@pytest.fixture
+def config_entry(config_entry: MockConfigEntry) -> MockConfigEntry:
+    """The account with broken-link repairs turned on."""
+    return MockConfigEntry(
+        domain=config_entry.domain,
+        title=config_entry.title,
+        unique_id=config_entry.unique_id,
+        data=config_entry.data,
+        options={CONF_BROKEN_LINK_REPAIRS: True},
+    )
 
 
 def _issues(hass: HomeAssistant) -> dict[str, ir.IssueEntry]:
@@ -127,4 +144,38 @@ async def test_issues_removed_with_the_entry(
     await hass.config_entries.async_remove(config_entry.entry_id)
     await hass.async_block_till_done()
 
+    assert _issues(hass) == {}
+
+
+@pytest.mark.usefixtures("mock_api")
+async def test_no_issues_by_default(
+    hass: HomeAssistant, config_entry: MockConfigEntry
+) -> None:
+    """Repairs stay quiet unless the owner opts in; the sensor still counts."""
+    config_entry.add_to_hass(hass)
+    hass.config_entries.async_update_entry(config_entry, options={})
+    await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert _issues(hass) == {}
+    assert hass.states.get("sensor.ana_example_com_broken_links").state == "1"
+
+
+@pytest.mark.usefixtures("mock_api")
+async def test_turning_the_option_off_clears_issues(
+    hass: HomeAssistant, config_entry: MockConfigEntry
+) -> None:
+    """Switching the option off from the options flow removes existing issues."""
+    await _setup(hass, config_entry)
+    assert _issues(hass)
+
+    result = await hass.config_entries.options.async_init(config_entry.entry_id)
+    assert result["type"] is FlowResultType.FORM
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {CONF_BROKEN_LINK_REPAIRS: False}
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    await hass.async_block_till_done()
+
+    assert config_entry.options == {CONF_BROKEN_LINK_REPAIRS: False}
     assert _issues(hass) == {}
