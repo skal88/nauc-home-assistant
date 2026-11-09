@@ -72,9 +72,11 @@ link fails and why:
 | `manage_url` | Page of the link in NAUC.link, to fix it |
 | `destinations` | Only when several destinations fail (programmable links, menus): `url`, `reason`, `last_checked` of each |
 
-Each broken link also shows up in **Settings → Repairs**, with the failing
-destination and a button to the link in NAUC.link. The notice disappears by
-itself once the destination works again.
+Optionally, each broken link can also show up in **Settings → Repairs**, with
+the failing destination and a button to the link in NAUC.link. It is off by
+default: turn on **Show broken links in Repairs** under **Configure** on the
+integration. The notice disappears by itself once the destination works again,
+and turning the option off clears the existing ones.
 
 To list them on a dashboard, use a Markdown card:
 

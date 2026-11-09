@@ -16,12 +16,14 @@ from homeassistant.util import dt as dt_util
 from .api import NaucApiClient, NaucApiError, NaucAuthError
 from .const import (
     APP_URL,
+    CONF_BROKEN_LINK_REPAIRS,
+    DEFAULT_BROKEN_LINK_REPAIRS,
     DOMAIN,
     LINK_HEALTH_INTERVAL,
     SHORT_BASE_URL,
     UPDATE_INTERVAL,
 )
-from .repairs import async_sync_broken_link_issues
+from .repairs import async_delete_broken_link_issues, async_sync_broken_link_issues
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -180,5 +182,11 @@ class NaucDataUpdateCoordinator(DataUpdateCoordinator[NaucData]):
 
         self._broken_links = broken
         self._health_fetched_at = now
-        async_sync_broken_link_issues(self.hass, self.config_entry, broken)
+        if self.config_entry.options.get(
+            CONF_BROKEN_LINK_REPAIRS, DEFAULT_BROKEN_LINK_REPAIRS
+        ):
+            async_sync_broken_link_issues(self.hass, self.config_entry, broken)
+        else:
+            # Also clears the issues raised before the option was turned off.
+            async_delete_broken_link_issues(self.hass, self.config_entry)
         return self._broken_links

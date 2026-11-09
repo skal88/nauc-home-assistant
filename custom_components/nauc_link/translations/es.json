@@ -29,6 +29,19 @@
       "default": "Conectado a NAUC.link."
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opciones de NAUC.link",
+        "data": {
+          "broken_link_repairs": "Mostrar los enlaces rotos en Reparaciones"
+        },
+        "data_description": {
+          "broken_link_repairs": "Crea un aviso en Ajustes → Reparaciones por cada enlace roto. El sensor Enlaces rotos los lista igualmente."
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "plan": {
